@@ -4,6 +4,7 @@ import { mutation, query } from "./_generated/server";
 export const createdocs = mutation({
   args: {
     name: v.string(),
+    orgId: v.string(),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity()
@@ -12,51 +13,22 @@ export const createdocs = mutation({
     }
     await ctx.db.insert("docs", {
       name: args.name,
+      orgId : args.orgId
     });
   },
 });
 
-export const createProduct = mutation({
-  args: {
-    name: v.string(),
-  },
-  handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity()
-    if (!identity) {
-      throw new ConvexError("you must loged in before adding any docs.")
-    }
-    await ctx.db.insert("Prod", {
-      name: args.name,
-    });
-  },
-});
-
-// export const getFiles = query({
-//     args : {},
-//     handler : async (ctx) => {
-//         console.log("Write and test your query function here!");
-//         return ctx.db.query("files").collect();
-//       }
-// })
 
 export const getdocs = query({
-  args: {},
-  handler: async (ctx) => {
-    // const identity = await ctx.auth.getUserIdentity()
+  args: {
+    orgId : v.string()
+  },
+  handler: async (ctx,args) => {
+    const identity = await ctx.auth.getUserIdentity()
     // if (!identity) {
     //   throw new ConvexError("you must loged in before fetchinng any docs.")
     // }
-    return await ctx.db.query("docs").collect();
+    return await ctx.db.query("docs").withIndex("by_orgId", q => q.eq("orgId" , args.orgId)).collect();
   },
 });
 
-export const getProd = query({
-  args: {},
-  handler: async (ctx) => {
-    // const identity = await ctx.auth.getUserIdentity()
-    // if (!identity) {
-    //   throw new ConvexError("you must loged in before adding any docs.")
-    // }
-    return await ctx.db.query("Prod").collect();
-  },
-});

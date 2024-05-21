@@ -1,43 +1,44 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import {
-  SignInButton,
-  SignedIn,
-  SignedOut,
-  SignOutButton,
+  useOrganization,
+  useUser,
 } from "@clerk/nextjs";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
+import Header from "@/components/ui/Header";
+import MaxWidthWrapper from "@/components/ui/MaxWithWrapper";
 
 export default function Home() {
+  const organization = useOrganization()
+  const user = useUser()
+
+  let orgId = null
+  
+  if ( organization.isLoaded && user.isLoaded) {
+    orgId = organization.organization?.id ?? user.user?.id
+  }
+
+  // console.log(organization?.id)
+  // console.log(organization?.imageUrl)
+
   // create name
   const creatdocs = useMutation(api.docs.createdocs);
-  const createProduct = useMutation(api.docs.createProduct);
 
   // files
-  const docs = useQuery(api.docs.getdocs);
-  const prod  = useQuery(api.docs.getProd);
+  const docs = useQuery(api.docs.getdocs , orgId ? {orgId } : "skip");
 
   const fn = () => {
-    console.log("success");
-    creatdocs({ name: `docs:${(Math.random() * 1000000).toFixed(0)}` });
+    if (!orgId) return ;
+    creatdocs({ name: `docs:${(Math.random() * 1000000).toFixed(0)}` , orgId : orgId});
   };
 
   return (
-    <>
-      <div className="w-full flex justify-end px-32 pt-2">
-        <SignedOut>
-          <SignInButton>
-            <Button>sign in</Button>
-          </SignInButton>
-        </SignedOut>
-        <SignedIn>
-          <SignOutButton>
-            <Button>sign Out</Button>
-          </SignOutButton>
-        </SignedIn>
+    <MaxWidthWrapper>
+      <div className="w-full flex justify-end  pt-2">
+        <Header />
       </div>
-      <main className="flex min-h-screen flex-col items-center gap-4">
+      <main className="flex mt-5  min-h-screen flex-col items-center gap-4">
         {docs?.map((file, i) => {
           return <h1 key={i}>{file.name}</h1>;
         })}
@@ -46,6 +47,6 @@ export default function Home() {
           add product
         </Button> */}
       </main>
-    </>
+    </MaxWidthWrapper>
   );
 }
