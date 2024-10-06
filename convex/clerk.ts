@@ -6,7 +6,7 @@ import { Webhook } from "svix";
 
 import { internalAction } from "./_generated/server";
 
-const webhookSecret = process.env.CLERK_WEBHOOK_SECRET || `whsec_4HrF+Yds0d+jD5YB6gJDhzyRtYVnkS3H`;
+const webhookSecret = process.env.CLERK_WEBHOOK_SECRET || ``;
 
 export const fulfill = internalAction({
   args: { headers: v.any(), payload: v.string() },
